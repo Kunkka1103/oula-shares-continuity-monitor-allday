@@ -63,8 +63,8 @@ func main() {
 	oulaDSN := flag.String("oula-dsn", "", "DSN for the Oula database")
 	aleoDSN := flag.String("aleo-dsn", "", "DSN for the Aleo database")
 	quaiDSN := flag.String("quai-dsn", "", "DSN for the Quai database")
-	pushgateway := flag.String("push-url", "http://127.0.0.1:9091", "Pushgateway URL")
-	interval := flag.Int("interval", 10, "Check interval in minutes")
+	pushgateway := flag.String("pushgateway", "http://127.0.0.1:9091", "Pushgateway URL")
+	interval := flag.Int("interval", 5, "Check interval in minutes")
 
 	flag.Parse()
 
@@ -90,33 +90,39 @@ func main() {
 	defer ticker.Stop()
 
 	for {
+		log.Println("Starting new check cycle")
+
 		aleoStart, err := getMaxEpoch(oulaDB, "ALEO")
 		if err != nil {
 			log.Printf("Error fetching Aleo max epoch: %v", err)
-			time.Sleep(time.Duration(*interval) * time.Minute)
+			time.Sleep(time.Second * 10)
 			continue
 		}
+		log.Printf("Fetched Aleo max epoch: %d", aleoStart)
 
 		quaiStart, err := getMaxEpoch(oulaDB, "Quai_Garden")
 		if err != nil {
 			log.Printf("Error fetching Quai max epoch: %v", err)
-			time.Sleep(time.Duration(*interval) * time.Minute)
+			time.Sleep(time.Second * 10)
 			continue
 		}
+		log.Printf("Fetched Quai max epoch: %d", quaiStart)
 
 		aleoContinuous, err := checkContinuity(aleoDB, "user_shares", aleoStart)
 		if err != nil {
 			log.Printf("Error checking Aleo continuity: %v", err)
-			time.Sleep(time.Duration(*interval) * time.Minute)
+			time.Sleep(time.Second * 10)
 			continue
 		}
+		log.Printf("Aleo continuity status: %v", aleoContinuous)
 
 		quaiContinuous, err := checkContinuity(quaiDB, "shares", quaiStart)
 		if err != nil {
 			log.Printf("Error checking Quai continuity: %v", err)
-			time.Sleep(time.Duration(*interval) * time.Minute)
+			time.Sleep(time.Second * 10)
 			continue
 		}
+		log.Printf("Quai continuity status: %v", quaiContinuous)
 
 		if err := pushMetric(*pushgateway, "aleo", "aleo_shares_continuity_status", boolToFloat64(aleoContinuous)); err != nil {
 			log.Printf("Error pushing Aleo metric: %v", err)
@@ -126,6 +132,7 @@ func main() {
 			log.Printf("Error pushing Quai metric: %v", err)
 		}
 
+		log.Println("Cycle completed, waiting for next interval")
 		<-ticker.C
 	}
 }
