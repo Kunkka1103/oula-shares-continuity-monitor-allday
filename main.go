@@ -93,24 +93,28 @@ func main() {
 		aleoStart, err := getMaxEpoch(oulaDB, "ALEO")
 		if err != nil {
 			log.Printf("Error fetching Aleo max epoch: %v", err)
+			time.Sleep(time.Duration(*interval) * time.Minute)
 			continue
 		}
 
 		quaiStart, err := getMaxEpoch(oulaDB, "Quai_Garden")
 		if err != nil {
 			log.Printf("Error fetching Quai max epoch: %v", err)
+			time.Sleep(time.Duration(*interval) * time.Minute)
 			continue
 		}
 
 		aleoContinuous, err := checkContinuity(aleoDB, "user_shares", aleoStart)
 		if err != nil {
 			log.Printf("Error checking Aleo continuity: %v", err)
+			time.Sleep(time.Duration(*interval) * time.Minute)
 			continue
 		}
 
 		quaiContinuous, err := checkContinuity(quaiDB, "shares", quaiStart)
 		if err != nil {
 			log.Printf("Error checking Quai continuity: %v", err)
+			time.Sleep(time.Duration(*interval) * time.Minute)
 			continue
 		}
 
