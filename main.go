@@ -63,7 +63,7 @@ func main() {
 	oulaDSN := flag.String("oula-dsn", "", "DSN for the Oula database")
 	aleoDSN := flag.String("aleo-dsn", "", "DSN for the Aleo database")
 	quaiDSN := flag.String("quai-dsn", "", "DSN for the Quai database")
-	pushgateway := flag.String("push-url", "", "Pushgateway URL")
+	pushgateway := flag.String("push-url", "http://127.0.0.1:9091", "Pushgateway URL")
 	interval := flag.Int("interval", 10, "Check interval in minutes")
 
 	flag.Parse()
