@@ -52,6 +52,7 @@ func pushMetric(pushgateway, job string, metricName string, value float64) error
 	})
 	gauge.Set(value)
 	if err := push.New(pushgateway, job).
+		Grouping("instance", "localhost").
 		Collector(gauge).
 		Push(); err != nil {
 		return err
