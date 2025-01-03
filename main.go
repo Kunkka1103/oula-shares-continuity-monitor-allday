@@ -46,13 +46,13 @@ func checkContinuity(db *sql.DB, tableName string, startEpoch int) (bool, error)
 	return true, nil
 }
 
-func pushMetric(pushgateway, job string, metricName string, value float64) error {
+func pushMetric(pushgateway, job string, metricName string, instance string,value float64) error {
 	gauge := prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: metricName,
 	})
 	gauge.Set(value)
 	if err := push.New(pushgateway, job).
-		//Grouping("instance", "localhost").
+		Grouping("instance",instance ).
 		Collector(gauge).
 		Push(); err != nil {
 		return err
@@ -125,11 +125,11 @@ func main() {
 		}
 		log.Printf("Quai continuity status: %v", quaiContinuous)
 
-		if err := pushMetric(*pushgateway, "aleo", "aleo_shares_continuity_status", boolToFloat64(aleoContinuous)); err != nil {
+		if err := pushMetric(*pushgateway, "aleo", "aleo_shares_continuity_status", "oula-jumpserver",boolToFloat64(aleoContinuous)); err != nil {
 			log.Printf("Error pushing Aleo metric: %v", err)
 		}
 
-		if err := pushMetric(*pushgateway, "quai", "quai_shares_continuity_status", boolToFloat64(quaiContinuous)); err != nil {
+		if err := pushMetric(*pushgateway, "quai", "quai_shares_continuity_status", "oula-jumpserver",boolToFloat64(quaiContinuous)); err != nil {
 			log.Printf("Error pushing Quai metric: %v", err)
 		}
 
